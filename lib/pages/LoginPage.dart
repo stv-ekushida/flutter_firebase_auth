@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_auth/services/Auth.dart';
+import 'package:flutter_firebase_auth/services/base/BaseAuth.dart';
 
 class LoginSignupPage extends StatefulWidget {
-
   LoginSignupPage({this.auth, this.loginCallback});
 
   final BaseAuth auth;
@@ -13,21 +12,17 @@ class LoginSignupPage extends StatefulWidget {
 }
 
 class _LoginSignupPageState extends State<LoginSignupPage> {
-
   final _formKey = GlobalKey<FormState>();
 
   String _email;
   String _password;
   String _errorMessage;
-
-  bool _isLoginForm;
   bool _isLoading;
 
   bool validateAndSave() {
-
     final form = _formKey.currentState;
 
-    if(form.validate()) {
+    if (form.validate()) {
       form.save();
       return true;
     }
@@ -36,36 +31,28 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   //ボタン押下時
   void validateAndSubmit() async {
-
     setState(() {
       _errorMessage = "";
       _isLoading = true;
     });
 
     if (validateAndSave()) {
-
       String userId = "";
       try {
-        if (_isLoginForm) {
-          userId = await widget.auth.signIn(_email, _password);
-          print('サインインユーザ : $userId');
-        } else {
-          userId = await widget.auth.signUp(_email, _password);
-          print('サインアウトユーザ: $userId');
-        }
+        userId = await widget.auth.signIn(_email, _password);
+        print('サインインユーザ : $userId');
         setState(() {
           _isLoading = false;
         });
 
-        if (userId.length > 0 && userId != null && _isLoginForm) {
+        if (userId.length > 0 && userId != null) {
           widget.loginCallback();
         }
       } catch (e) {
-
         print('Error: $e');
         setState(() {
           _isLoading = false;
-          _errorMessage = e.messae;
+          _errorMessage = e.message;
           _formKey.currentState.reset();
         });
       }
@@ -80,20 +67,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   void initState() {
     _errorMessage = "";
     _isLoading = false;
-    _isLoginForm = true;
     super.initState();
-  }
-
-  void resetForm() {
-    _formKey.currentState.reset();
-    _errorMessage = "";
-  }
-
-  void toggleFormMode() {
-    resetForm();
-    setState(() {
-      _isLoginForm = !_isLoginForm;
-    });
   }
 
   @override
@@ -103,10 +77,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
         title: Text('ログイン'),
       ),
       body: Stack(
-        children: <Widget>[
-          _showForm(),
-          _showCircularProgress()
-        ],
+        children: <Widget>[_showForm(), _showCircularProgress()],
       ),
     );
   }
@@ -132,8 +103,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
               showLogo(),
               showEmailInput(),
               showPasswordInput(),
-              showPrimaryButton(),
-              showSecondaryButton(),
+              showLoginButton(),
               showErrorMessage(),
             ],
           ),
@@ -142,14 +112,16 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   Widget showErrorMessage() {
     if (_errorMessage.length > 0 && _errorMessage != null) {
-      return Text(
-        _errorMessage,
-        style: TextStyle(
-            fontSize: 13.0,
-            color: Colors.red,
-            height: 1.0,
-            fontWeight: FontWeight.w300),
-      );
+      return Container(
+          margin: EdgeInsets.only(top: 16.0),
+          child: Text(
+            _errorMessage,
+            style: TextStyle(
+                fontSize: 13.0,
+                color: Colors.red,
+                height: 1.0,
+                fontWeight: FontWeight.w300),
+          ));
     } else {
       return Container(
         height: 0.0,
@@ -209,15 +181,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     );
   }
 
-  Widget showSecondaryButton() {
-    return FlatButton(
-        child: Text(
-            _isLoginForm ? 'アカウント作成' : 'すでにアカウントを持っていますか？',
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
-        onPressed: toggleFormMode);
-  }
-
-  Widget showPrimaryButton() {
+  Widget showLoginButton() {
     return Padding(
         padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
         child: SizedBox(
@@ -227,7 +191,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0)),
             color: Colors.blue,
-            child: Text(_isLoginForm ? 'ログイン' : 'アカウント作成',
+            child: Text('ログイン',
                 style: TextStyle(fontSize: 20.0, color: Colors.white)),
             onPressed: validateAndSubmit,
           ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_auth/services/Auth.dart';
+import 'package:flutter_firebase_auth/services/base/BaseAuth.dart';
 import 'package:flutter_firebase_auth/pages/LoginPage.dart';
 import 'package:flutter_firebase_auth/pages/HomePage.dart';
 
 enum AuthStatus {
   NOT_DETERMINED,
-  NOT_LOGGED_IN,  //未ログイン
-  LOGGED_IN,      //ログイン済み
+  NOT_LOGGED_IN, //未ログイン
+  LOGGED_IN, //ログイン済み
 }
 
 class RootPage extends StatefulWidget {
@@ -19,7 +19,6 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-
   AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
   String _userId = "";
 
@@ -27,22 +26,22 @@ class _RootPageState extends State<RootPage> {
   void initState() {
     super.initState();
 
-    widget.auth.getCurrentUser().then((user) {
+    widget.auth.getCurrentUser().then((uid) {
       setState(() {
-        if (user != null) {
-          _userId = user?.uid;
+        if (uid != null) {
+          _userId = uid;
         }
 
         authStatus =
-        user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
+            uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
       });
     });
   }
 
   void loginCallback() {
-    widget.auth.getCurrentUser().then((user) {
+    widget.auth.getCurrentUser().then((uid) {
       setState(() {
-        _userId = user.uid.toString();
+        _userId = uid;
       });
     });
     setState(() {
